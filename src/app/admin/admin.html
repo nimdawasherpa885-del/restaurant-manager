@@ -5,6 +5,8 @@
       <button [class.active]="activeTab() === 'users'" (click)="activeTab.set('users')">Users</button>
       <button [class.active]="activeTab() === 'menu'" (click)="activeTab.set('menu')">Menu</button>
       <button [class.active]="activeTab() === 'tables'" (click)="activeTab.set('tables')">Tables</button>
+      <a href="/staff" class="nav-pill">👨‍🍳 Staff</a>
+      <a href="/reports" class="nav-pill">📊 Reports</a>
     </nav>
     <button class="logout-btn" (click)="logout()">Logout</button>
   </header>

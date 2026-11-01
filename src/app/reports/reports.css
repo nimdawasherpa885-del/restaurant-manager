@@ -1,0 +1,77 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', sans-serif; background: #f4f6f8; }
+
+.app { max-width: 960px; margin: 0 auto; padding: 20px; }
+
+header {
+  background: #1a3a2a;
+  color: white;
+  padding: 16px 24px;
+  border-radius: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+header h1 { font-size: 1.3rem; }
+.header-right { display: flex; gap: 12px; align-items: center; }
+.nav-link { color: rgba(255,255,255,0.8); text-decoration: none; font-size: 0.9rem; }
+.nav-link:hover { color: white; }
+.logout-btn { background: #e74c3c; color: white; border: none; padding: 6px 16px; border-radius: 20px; cursor: pointer; font-size: 0.9rem; }
+
+.date-bar {
+  background: white;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-size: 0.9rem;
+  color: #555;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.summary-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  border-left: 4px solid;
+}
+
+.summary-card.green { border-color: #27ae60; }
+.summary-card.blue { border-color: #3498db; }
+.summary-card.orange { border-color: #e67e22; }
+.summary-card.purple { border-color: #9b59b6; }
+
+.s-icon { font-size: 2rem; }
+.s-num { font-size: 1.6rem; font-weight: 700; color: #1a3a2a; }
+.s-label { font-size: 0.8rem; color: #aaa; margin-top: 2px; }
+
+section {
+  background: white;
+  border-radius: 10px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  margin-bottom: 20px;
+}
+
+h2 { font-size: 1.05rem; color: #1a3a2a; margin-bottom: 16px; border-bottom: 2px solid #f0f0f0; padding-bottom: 8px; }
+
+table { width: 100%; border-collapse: collapse; }
+th { text-align: left; padding: 10px; background: #f8f9fa; font-size: 0.85rem; color: #666; }
+td { padding: 10px; border-bottom: 1px solid #f0f0f0; font-size: 0.88rem; }
+tr:last-child td { border-bottom: none; }
+
+.badge { padding: 3px 10px; border-radius: 12px; font-size: 0.8rem; text-transform: capitalize; }
+.badge.paid { background: #eafaf1; color: #27ae60; }
+.badge.open { background: #fef9e7; color: #e67e22; }

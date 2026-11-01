@@ -1,1 +1,89 @@
-<p>reports works!</p>
+<div class="app">
+  <header>
+    <h1>📊 Daily Reports</h1>
+    <div class="header-right">
+      <a href="/admin" class="nav-link">← Admin</a>
+      <button class="logout-btn" (click)="logout()">Logout</button>
+    </div>
+  </header>
+
+  <div class="date-bar">📅 {{ today }} · Himalayan Bites, Lava, Kalimpong</div>
+
+  <!-- SUMMARY CARDS -->
+  <div class="summary-grid">
+    <div class="summary-card green">
+      <div class="s-icon">💰</div>
+      <div class="s-info">
+        <div class="s-num">₹{{ totalRevenue() }}</div>
+        <div class="s-label">Total Revenue</div>
+      </div>
+    </div>
+    <div class="summary-card blue">
+      <div class="s-icon">🧾</div>
+      <div class="s-info">
+        <div class="s-num">{{ paidCount() }}</div>
+        <div class="s-label">Orders Completed</div>
+      </div>
+    </div>
+    <div class="summary-card orange">
+      <div class="s-icon">🍽️</div>
+      <div class="s-info">
+        <div class="s-num">{{ openCount() }}</div>
+        <div class="s-label">Orders Open</div>
+      </div>
+    </div>
+    <div class="summary-card purple">
+      <div class="s-icon">📋</div>
+      <div class="s-info">
+        <div class="s-num">{{ orders().length }}</div>
+        <div class="s-label">Total Orders</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOP ITEMS -->
+  <section>
+    <h2>🏆 Top Selling Items Today</h2>
+    <table>
+      <thead>
+        <tr><th>#</th><th>Item</th><th>Qty Sold</th><th>Revenue</th></tr>
+      </thead>
+      <tbody>
+        @for (item of topItems(); track item.name; let i = $index) {
+          <tr>
+            <td>{{ i + 1 }}</td>
+            <td><strong>{{ item.name }}</strong></td>
+            <td>{{ item.qty }}</td>
+            <td>₹{{ item.revenue }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ORDER LOG -->
+  <section>
+    <h2>📋 Order Log</h2>
+    <table>
+      <thead>
+        <tr><th>Order #</th><th>Table</th><th>Time</th><th>Items</th><th>Total</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        @for (order of orders(); track order.id) {
+          <tr>
+            <td>#{{ order.id }}</td>
+            <td>Table {{ order.tableNumber }}</td>
+            <td>{{ order.time }}</td>
+            <td>{{ order.items.map(i => i.menuItem.name).join(', ') }}</td>
+            <td>₹{{ orderTotal(order) }}</td>
+            <td>
+              <span class="badge" [class.paid]="order.status === 'paid'" [class.open]="order.status === 'open'">
+                {{ order.status }}
+              </span>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </section>
+</div>

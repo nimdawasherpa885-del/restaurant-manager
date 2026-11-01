@@ -33,6 +33,18 @@ nav button {
 
 nav button.active, nav button:hover { background: white; color: #1a252f; }
 
+.nav-pill {
+  color: white;
+  border: 2px solid rgba(255,255,255,0.3);
+  padding: 6px 16px;
+  border-radius: 20px;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.nav-pill:hover { background: white; color: #1a252f; }
+
 .logout-btn {
   background: #e74c3c;
   color: white;
