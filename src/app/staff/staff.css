@@ -1,0 +1,72 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', sans-serif; background: #f4f6f8; }
+
+.app { max-width: 960px; margin: 0 auto; padding: 20px; }
+
+header {
+  background: #1a3a2a;
+  color: white;
+  padding: 16px 24px;
+  border-radius: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+header h1 { font-size: 1.3rem; }
+.header-right { display: flex; gap: 12px; align-items: center; }
+
+.nav-link { color: rgba(255,255,255,0.8); text-decoration: none; font-size: 0.9rem; }
+.nav-link:hover { color: white; }
+
+.logout-btn { background: #e74c3c; color: white; border: none; padding: 6px 16px; border-radius: 20px; cursor: pointer; font-size: 0.9rem; }
+
+section { background: white; border-radius: 10px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
+
+.top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+
+.stats { display: flex; gap: 24px; }
+.stat { display: flex; flex-direction: column; align-items: center; }
+.num { font-size: 1.6rem; font-weight: 700; color: #1a3a2a; }
+.num.green { color: #27ae60; }
+.num.red { color: #e74c3c; }
+.stat span:last-child { font-size: 0.75rem; color: #aaa; }
+
+.add-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+input, select {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  outline: none;
+}
+input:focus, select:focus { border-color: #2d5a3d; }
+
+button { cursor: pointer; border: none; border-radius: 6px; padding: 8px 14px; font-size: 0.85rem; }
+.btn-green { background: #27ae60; color: white; }
+.btn-gray { background: #bdc3c7; color: white; }
+.btn-red { background: #e74c3c; color: white; }
+.btn-blue { background: #3498db; color: white; }
+.btn-small { padding: 5px 10px; font-size: 0.8rem; }
+
+table { width: 100%; border-collapse: collapse; }
+th { text-align: left; padding: 10px; background: #f8f9fa; font-size: 0.85rem; color: #666; }
+td { padding: 10px; border-bottom: 1px solid #f0f0f0; font-size: 0.9rem; }
+tr:last-child td { border-bottom: none; }
+
+.actions { display: flex; gap: 6px; }
+
+.badge { padding: 3px 10px; border-radius: 12px; font-size: 0.8rem; }
+.badge.active { background: #eafaf1; color: #27ae60; }
+.badge.off { background: #fdf2f2; color: #e74c3c; }
+.badge.shift { background: #eaf0fb; color: #3498db; }

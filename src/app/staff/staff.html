@@ -1,0 +1,60 @@
+<div class="app">
+  <header>
+    <h1>👨‍🍳 Staff Management</h1>
+    <div class="header-right">
+      <a href="/admin" class="nav-link">← Admin</a>
+      <button class="logout-btn" (click)="logout()">Logout</button>
+    </div>
+  </header>
+
+  <section>
+    <div class="top-bar">
+      <div class="stats">
+        <div class="stat"><span class="num">{{ staff().length }}</span><span>Total Staff</span></div>
+        <div class="stat"><span class="num green">{{ activeCount() }}</span><span>On Duty</span></div>
+        <div class="stat"><span class="num red">{{ staff().length - activeCount() }}</span><span>Off Duty</span></div>
+      </div>
+      <button class="btn-green" (click)="showForm = !showForm">+ Add Staff</button>
+    </div>
+
+    @if (showForm) {
+      <div class="add-form">
+        <input [(ngModel)]="newStaff.name" placeholder="Full name" />
+        <input [(ngModel)]="newStaff.role" placeholder="Role (Chef, Waiter...)" />
+        <input [(ngModel)]="newStaff.phone" placeholder="Phone number" />
+        <select [(ngModel)]="newStaff.shift">
+          <option>Morning</option>
+          <option>Evening</option>
+          <option>Night</option>
+        </select>
+        <button class="btn-green" (click)="addStaff()">Save</button>
+        <button class="btn-gray" (click)="showForm = false">Cancel</button>
+      </div>
+    }
+
+    <table>
+      <thead>
+        <tr><th>Name</th><th>Role</th><th>Phone</th><th>Shift</th><th>Status</th><th></th></tr>
+      </thead>
+      <tbody>
+        @for (s of staff(); track s.id) {
+          <tr>
+            <td><strong>{{ s.name }}</strong></td>
+            <td>{{ s.role }}</td>
+            <td>{{ s.phone }}</td>
+            <td><span class="badge shift">{{ s.shift }}</span></td>
+            <td>
+              <span class="badge" [class.active]="s.status === 'active'" [class.off]="s.status === 'off'">
+                {{ s.status === 'active' ? '🟢 On Duty' : '🔴 Off Duty' }}
+              </span>
+            </td>
+            <td class="actions">
+              <button class="btn-small btn-blue" (click)="toggleStatus(s.id)">Toggle</button>
+              <button class="btn-small btn-red" (click)="deleteStaff(s.id)">Remove</button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </section>
+</div>

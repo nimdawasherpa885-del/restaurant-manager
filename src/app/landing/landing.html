@@ -1,0 +1,77 @@
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-overlay">
+    <div class="hero-content">
+      <p class="location">📍 Lava, Kalimpong, West Bengal</p>
+      <h1>Himalayan Bites</h1>
+      <p class="tagline">Where the mountains meet the flavors of Bengal, Nepal & Tibet</p>
+      <div class="hero-btns">
+        <a routerLink="/reservations" class="btn-primary">Book a Table</a>
+        <a routerLink="/login" class="btn-outline">Staff Login</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- HIGHLIGHTS -->
+<section class="highlights">
+  <div class="container">
+    <h2>Why Visit Us?</h2>
+    <div class="grid-4">
+      @for (h of highlights; track h.title) {
+        <div class="card">
+          <div class="icon">{{ h.icon }}</div>
+          <h3>{{ h.title }}</h3>
+          <p>{{ h.desc }}</p>
+        </div>
+      }
+    </div>
+  </div>
+</section>
+
+<!-- MENU PREVIEW -->
+<section class="menu-section">
+  <div class="container">
+    <h2>Our Specialties</h2>
+    <p class="sub">A taste of the hills — crafted with love</p>
+    <div class="grid-3">
+      @for (item of menu; track item.name) {
+        <div class="menu-card">
+          <div class="menu-top">
+            <span class="menu-name">{{ item.name }}</span>
+            <span class="menu-price">{{ item.price }}</span>
+          </div>
+          <span class="badge">{{ item.category }}</span>
+          <p class="menu-desc">{{ item.desc }}</p>
+        </div>
+      }
+    </div>
+  </div>
+</section>
+
+<!-- LOCATION -->
+<section class="location-section">
+  <div class="container location-grid">
+    <div class="location-info">
+      <h2>Find Us</h2>
+      <p>🏠 Near Lava Forest Bungalow<br>Lava, Kalimpong District<br>West Bengal — 734314</p>
+      <br>
+      <p>📞 +91 98300 00000</p>
+      <p>📧 himalayanbites&#64;lava.in</p>
+      <br>
+      <p>🕐 Open Daily: 7:00 AM – 10:00 PM</p>
+    </div>
+    <div class="map-placeholder">
+      🗺️
+      <p>Lava, Kalimpong</p>
+      <p>West Bengal, India</p>
+      <p>Altitude: ~7,200 ft</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>© 2024 Himalayan Bites · Lava, Kalimpong, West Bengal</p>
+  <p>Made with ❤️ in the mountains</p>
+</footer>

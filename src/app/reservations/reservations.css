@@ -1,0 +1,111 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', sans-serif; background: #f4f6f8; }
+
+.res-hero {
+  background: linear-gradient(135deg, #1a3a2a, #4a7c59);
+  color: white;
+  padding: 40px 24px;
+  text-align: center;
+  position: relative;
+}
+
+.back-btn {
+  position: absolute;
+  left: 24px;
+  top: 24px;
+  color: rgba(255,255,255,0.8);
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.back-btn:hover { color: white; }
+
+.res-hero h1 { font-size: 2rem; margin-bottom: 8px; }
+.res-hero p { color: rgba(255,255,255,0.75); font-size: 0.95rem; }
+
+.res-body {
+  max-width: 1000px;
+  margin: 40px auto;
+  padding: 0 20px;
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 24px;
+  align-items: start;
+}
+
+.res-form-box {
+  background: white;
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+}
+
+.res-form-box h2 { font-size: 1.3rem; color: #1a3a2a; margin-bottom: 6px; }
+.sub { color: #aaa; font-size: 0.85rem; margin-bottom: 24px; }
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-group.full { grid-column: 1 / -1; }
+
+label { font-size: 0.85rem; font-weight: 600; color: #555; }
+
+input {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border 0.2s;
+}
+
+input:focus { border-color: #2d5a3d; }
+
+button {
+  width: 100%;
+  padding: 14px;
+  background: #e67e22;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+button:hover { background: #d35400; }
+
+.success-box {
+  background: #eafaf1;
+  border: 1px solid #27ae60;
+  color: #1e8449;
+  padding: 14px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.error { color: #e74c3c; font-size: 0.85rem; margin-bottom: 16px; }
+
+.info-box {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+}
+
+.info-box h3 { font-size: 0.95rem; color: #1a3a2a; margin-bottom: 8px; }
+.info-box p { font-size: 0.88rem; color: #666; line-height: 1.7; }
+.info-box hr { border: none; border-top: 1px solid #f0f0f0; margin: 16px 0; }
+
+@media (max-width: 700px) {
+  .res-body { grid-template-columns: 1fr; }
+  .form-grid { grid-template-columns: 1fr; }
+}

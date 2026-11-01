@@ -1,0 +1,64 @@
+<div class="res-page">
+  <div class="res-hero">
+    <a routerLink="/" class="back-btn">← Back to Home</a>
+    <h1>🍽️ Book a Table</h1>
+    <p>Himalayan Bites · Lava, Kalimpong, West Bengal</p>
+  </div>
+
+  <div class="res-body">
+    <div class="res-form-box">
+      <h2>Make a Reservation</h2>
+      <p class="sub">We're open daily 7:00 AM – 10:00 PM</p>
+
+      @if (success) {
+        <div class="success-box">✅ {{ success }}</div>
+      }
+      @if (error) {
+        <p class="error">{{ error }}</p>
+      }
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Full Name *</label>
+          <input [(ngModel)]="form.name" type="text" placeholder="Your name" />
+        </div>
+        <div class="form-group">
+          <label>Phone Number *</label>
+          <input [(ngModel)]="form.phone" type="tel" placeholder="+91 XXXXX XXXXX" />
+        </div>
+        <div class="form-group">
+          <label>Date *</label>
+          <input [(ngModel)]="form.date" type="date" [min]="today()" />
+        </div>
+        <div class="form-group">
+          <label>Time *</label>
+          <input [(ngModel)]="form.time" type="time" />
+        </div>
+        <div class="form-group">
+          <label>Number of Guests</label>
+          <input [(ngModel)]="form.guests" type="number" min="1" max="20" />
+        </div>
+        <div class="form-group full">
+          <label>Special Request</label>
+          <input [(ngModel)]="form.note" type="text" placeholder="Window seat, birthday, dietary needs..." />
+        </div>
+      </div>
+
+      <button (click)="submit()">Confirm Reservation</button>
+    </div>
+
+    <div class="info-box">
+      <h3>📍 Location</h3>
+      <p>Near Lava Forest Bungalow<br>Lava, Kalimpong District<br>West Bengal — 734314</p>
+      <hr>
+      <h3>📞 Contact</h3>
+      <p>+91 98300 00000</p>
+      <hr>
+      <h3>🕐 Hours</h3>
+      <p>Monday – Sunday<br>7:00 AM – 10:00 PM</p>
+      <hr>
+      <h3>🏔️ About</h3>
+      <p>Nestled at 7,200 ft in the Lava hills, we serve authentic mountain cuisine with breathtaking Himalayan views.</p>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,87 @@
+<div class="app">
+  <header>
+    <h1>⚙️ Admin Panel</h1>
+    <nav>
+      <button [class.active]="activeTab() === 'users'" (click)="activeTab.set('users')">Users</button>
+      <button [class.active]="activeTab() === 'menu'" (click)="activeTab.set('menu')">Menu</button>
+      <button [class.active]="activeTab() === 'tables'" (click)="activeTab.set('tables')">Tables</button>
+    </nav>
+    <button class="logout-btn" (click)="logout()">Logout</button>
+  </header>
+
+  <!-- USERS TAB -->
+  @if (activeTab() === 'users') {
+    <section>
+      <h2>Manage Users</h2>
+      <table>
+        <thead>
+          <tr><th>Username</th><th>Role</th><th></th></tr>
+        </thead>
+        <tbody>
+          @for (user of users(); track user.username) {
+            <tr>
+              <td>{{ user.username }}</td>
+              <td><span class="badge" [class.admin]="user.role === 'Admin'">{{ user.role }}</span></td>
+              <td>
+                @if (user.username !== 'admin') {
+                  <button class="btn-red" (click)="deleteUser(user.username)">Delete</button>
+                } @else {
+                  <span class="protected">Protected</span>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </section>
+  }
+
+  <!-- MENU TAB -->
+  @if (activeTab() === 'menu') {
+    <section>
+      <h2>Manage Menu</h2>
+      <div class="add-form">
+        <input [(ngModel)]="newItem.name" placeholder="Item name" />
+        <input [(ngModel)]="newItem.price" type="number" placeholder="Price" />
+        <input [(ngModel)]="newItem.category" placeholder="Category" />
+        <button class="btn-green" (click)="addMenuItem()">+ Add</button>
+      </div>
+      <table>
+        <thead>
+          <tr><th>Name</th><th>Category</th><th>Price</th><th></th></tr>
+        </thead>
+        <tbody>
+          @for (item of menuItems(); track item.id) {
+            <tr>
+              <td>{{ item.name }}</td>
+              <td><span class="badge">{{ item.category }}</span></td>
+              <td>${{ item.price.toFixed(2) }}</td>
+              <td><button class="btn-red" (click)="removeMenuItem(item.id)">Remove</button></td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </section>
+  }
+
+  <!-- TABLES TAB -->
+  @if (activeTab() === 'tables') {
+    <section>
+      <h2>Manage Tables</h2>
+      <div class="table-setting">
+        <label>Number of Tables</label>
+        <div class="table-setting-row">
+          <input [(ngModel)]="newTableCount" type="number" min="1" max="50" style="width: 80px" />
+          <button class="btn-green" (click)="saveTables()">Save</button>
+        </div>
+      </div>
+      <div class="tables-grid">
+        @for (t of tables(); track t) {
+          <div class="table-card">
+            <div class="table-num">Table {{ t }}</div>
+          </div>
+        }
+      </div>
+    </section>
+  }
+</div>
