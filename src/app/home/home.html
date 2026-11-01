@@ -1,97 +1,133 @@
-<div class="app">
+<div class="app" [class.blur]="selectedOrder">
+
   <header>
-    <h1>🍽️ Restaurant Manager</h1>
+    <div class="header-left">
+      <h1>🍽️ {{ ds.settings().name }}</h1>
+      <span class="waiter-tag">👤 {{ waiterName }}</span>
+    </div>
     <nav>
-      <button [class.active]="activeTab() === 'menu'" (click)="activeTab.set('menu')">Menu</button>
-      <button [class.active]="activeTab() === 'orders'" (click)="activeTab.set('orders')">Orders</button>
-      <button [class.active]="activeTab() === 'tables'" (click)="activeTab.set('tables')">Tables</button>
+      <button [class.active]="activeTab() === 'orders'" (click)="activeTab.set('orders')">📋 Orders</button>
+      <button [class.active]="activeTab() === 'menu'" (click)="activeTab.set('menu')">🍴 New Order</button>
+      <button [class.active]="activeTab() === 'tables'" (click)="activeTab.set('tables')">🪑 Tables</button>
+      <button [class.active]="activeTab() === 'kot'" (click)="activeTab.set('kot')">🧾 KOT</button>
     </nav>
     <button class="logout-btn" (click)="logout()">Logout</button>
   </header>
 
-  <!-- MENU TAB -->
+  <!-- QUICK STATS BAR -->
+  <div class="stats-bar">
+    <div class="stat-item">🟢 Open: <strong>{{ ds.openOrders().length }}</strong></div>
+    <div class="stat-item">✅ Paid: <strong>{{ ds.paidOrders().length }}</strong></div>
+    <div class="stat-item">💰 Today: <strong>{{ ds.settings().currency }}{{ ds.todayRevenue() }}</strong></div>
+    <div class="stat-item">🪑 Tables: <strong>{{ ds.settings().tableCount }}</strong></div>
+  </div>
+
+  <!-- NEW ORDER TAB -->
   @if (activeTab() === 'menu') {
     <section>
-      <h2>Menu Items</h2>
-      <div class="add-form">
-        <input [(ngModel)]="newItem.name" placeholder="Item name" />
-        <input [(ngModel)]="newItem.price" type="number" placeholder="Price" />
-        <input [(ngModel)]="newItem.category" placeholder="Category" />
-        <button class="btn-green" (click)="addMenuItem()">+ Add</button>
+      <h2>New Order</h2>
+      <div class="order-meta">
+        <label>Table #
+          <input [(ngModel)]="newOrderTable" type="number" min="1" [max]="ds.settings().tableCount" style="width:70px" />
+        </label>
+        <label>Discount (₹)
+          <input [(ngModel)]="newOrderDiscount" type="number" min="0" style="width:80px" />
+        </label>
+        <span class="item-count">{{ orderItemCount() }} item(s) selected</span>
       </div>
-      <table>
-        <thead>
-          <tr><th>Name</th><th>Category</th><th>Price</th><th></th></tr>
-        </thead>
-        <tbody>
-          @for (item of menuItems(); track item.id) {
-            <tr>
-              <td>{{ item.name }}</td>
-              <td><span class="badge">{{ item.category }}</span></td>
-              <td>${{ item.price.toFixed(2) }}</td>
-              <td><button class="btn-red" (click)="removeMenuItem(item.id)">Remove</button></td>
-            </tr>
-          }
-        </tbody>
-      </table>
+
+      @for (cat of categories(); track cat) {
+        <div class="cat-section">
+          <div class="cat-title">{{ cat }}</div>
+          <div class="menu-grid">
+            @for (item of menuByCategory(cat); track item.id) {
+              <div class="menu-item-card" [class.selected]="getQty(item.id) > 0">
+                <div class="mi-name">{{ item.name }}</div>
+                <div class="mi-desc">{{ item.description }}</div>
+                <div class="mi-bottom">
+                  <span class="mi-price">₹{{ item.price }}</span>
+                  <div class="qty-control">
+                    <button (click)="setQty(item.id, getQty(item.id) - 1)">−</button>
+                    <span>{{ getQty(item.id) }}</span>
+                    <button (click)="setQty(item.id, getQty(item.id) + 1)">+</button>
+                  </div>
+                </div>
+                @if (getQty(item.id) > 0) {
+                  <input class="note-input" [value]="getNote(item.id)" (input)="setNote(item.id, $any($event.target).value)" placeholder="Note (e.g. no spice)" />
+                }
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <div class="place-order-bar">
+        <button class="btn-big-green" (click)="createOrder()" [disabled]="orderItemCount() === 0">
+          ✅ Place Order for Table {{ newOrderTable }}
+        </button>
+      </div>
     </section>
   }
 
   <!-- ORDERS TAB -->
   @if (activeTab() === 'orders') {
     <section>
-      <h2>New Order</h2>
-      <div class="order-form">
-        <label>Table #
-          <input [(ngModel)]="newOrderTable" type="number" min="1" max="10" style="width:60px" />
-        </label>
-        <div class="menu-select">
-          @for (item of menuItems(); track item.id) {
-            <div class="menu-select-row">
-              <span>{{ item.name }} (${{ item.price.toFixed(2) }})</span>
-              <input type="number" min="0" [(ngModel)]="selectedItems[item.id]" placeholder="0" style="width:55px" />
+      <h2>Open Orders</h2>
+      @if (ds.openOrders().length === 0) { <p class="empty">No open orders right now.</p> }
+      <div class="orders-grid">
+        @for (order of ds.openOrders(); track order.id) {
+          <div class="order-card open">
+            <div class="order-header">
+              <strong>Order #{{ order.id }} · Table {{ order.tableNumber }}</strong>
+              <span class="time">{{ order.time | date:'shortTime' }}</span>
             </div>
-          }
-        </div>
-        <button class="btn-green" (click)="createOrder()">Place Order</button>
+            <div class="order-waiter">👤 {{ order.waiter }}</div>
+            <ul>
+              @for (i of order.items; track i.menuItem.id) {
+                <li>
+                  {{ i.menuItem.name }} × {{ i.qty }}
+                  <span class="item-price">₹{{ i.menuItem.price * i.qty }}</span>
+                  @if (i.note) { <span class="item-note">📝 {{ i.note }}</span> }
+                </li>
+              }
+            </ul>
+            <div class="order-totals">
+              <span>Subtotal: ₹{{ ds.orderSubtotal(order) }}</span>
+              @if (order.discount > 0) { <span class="discount">Discount: −₹{{ order.discount }}</span> }
+              <span>GST ({{ ds.settings().gstPercent }}%): ₹{{ ds.orderTax(order) }}</span>
+              <strong>Total: ₹{{ ds.orderTotal(order) }}</strong>
+            </div>
+            <div class="order-actions">
+              @if (!order.kotSent) {
+                <button class="btn-orange" (click)="ds.sendKOT(order.id)">🧾 Send KOT</button>
+              } @else {
+                <span class="kot-sent">✅ KOT Sent</span>
+              }
+              <button class="btn-blue" (click)="viewBill(order)">🖨️ Bill</button>
+              <button class="btn-green" (click)="ds.updateOrderStatus(order.id, 'paid')">✅ Paid</button>
+              <button class="btn-red" (click)="ds.updateOrderStatus(order.id, 'cancelled')">✖ Cancel</button>
+            </div>
+          </div>
+        }
       </div>
 
-      <h2>Open Orders ({{ openOrders().length }})</h2>
-      @for (order of openOrders(); track order.id) {
-        <div class="order-card open">
-          <div class="order-header">
-            <strong>Order #{{ order.id }} — Table {{ order.tableNumber }}</strong>
-            <span class="time">{{ order.time | date:'shortTime' }}</span>
-          </div>
-          <ul>
-            @for (i of order.items; track i.menuItem.id) {
-              <li>{{ i.menuItem.name }} x{{ i.qty }} — ${{ (i.menuItem.price * i.qty).toFixed(2) }}</li>
-            }
-          </ul>
-          <div class="order-footer">
-            <strong>Total: ${{ orderTotal(order).toFixed(2) }}</strong>
-            <div>
-              <button class="btn-green" (click)="markPaid(order.id)">Mark Paid</button>
-              <button class="btn-red" (click)="deleteOrder(order.id)">Delete</button>
+      <h2 style="margin-top:24px">Paid Orders Today</h2>
+      @if (ds.paidOrders().length === 0) { <p class="empty">No paid orders yet.</p> }
+      <div class="orders-grid">
+        @for (order of ds.paidOrders(); track order.id) {
+          <div class="order-card paid">
+            <div class="order-header">
+              <strong>Order #{{ order.id }} · Table {{ order.tableNumber }}</strong>
+              <span class="badge green">Paid</span>
+            </div>
+            <div class="order-footer">
+              <span>Total: ₹{{ ds.orderTotal(order) }}</span>
+              <button class="btn-blue" (click)="viewBill(order)">🖨️ Bill</button>
+              <button class="btn-red" (click)="ds.deleteOrder(order.id)">Delete</button>
             </div>
           </div>
-        </div>
-      }
-      @if (openOrders().length === 0) { <p class="empty">No open orders.</p> }
-
-      <h2>Paid Orders ({{ paidOrders().length }})</h2>
-      @for (order of paidOrders(); track order.id) {
-        <div class="order-card paid">
-          <div class="order-header">
-            <strong>Order #{{ order.id }} — Table {{ order.tableNumber }}</strong>
-            <span class="badge green">Paid</span>
-          </div>
-          <div class="order-footer">
-            <span>Total: ${{ orderTotal(order).toFixed(2) }}</span>
-            <button class="btn-red" (click)="deleteOrder(order.id)">Delete</button>
-          </div>
-        </div>
-      }
+        }
+      </div>
     </section>
   }
 
@@ -100,13 +136,97 @@
     <section>
       <h2>Tables Overview</h2>
       <div class="tables-grid">
-        @for (t of tables(); track t.number) {
-          <div class="table-card" [class.occupied]="tableStatus(t.number) === 'occupied'">
-            <div class="table-num">Table {{ t.number }}</div>
-            <div class="table-status">{{ tableStatus(t.number) === 'occupied' ? '🔴 Occupied' : '🟢 Free' }}</div>
+        @for (n of [].constructor(ds.settings().tableCount); track $index) {
+          <div class="table-card" [class.occupied]="ds.tableStatus($index + 1) === 'occupied'"
+               (click)="activeTab.set('menu'); newOrderTable = $index + 1">
+            <div class="table-num">Table {{ $index + 1 }}</div>
+            <div class="table-status">{{ ds.tableStatus($index + 1) === 'occupied' ? '🔴 Occupied' : '🟢 Free' }}</div>
+            @if (ds.tableStatus($index + 1) === 'occupied') {
+              <div class="table-orders">
+                {{ ds.openOrders().filter(o => o.tableNumber === $index + 1).length }} order(s)
+              </div>
+            }
           </div>
         }
       </div>
     </section>
   }
+
+  <!-- KOT TAB -->
+  @if (activeTab() === 'kot') {
+    <section>
+      <h2>Kitchen Order Tickets</h2>
+      @if (ds.openOrders().filter(o => !o.kotSent).length === 0) {
+        <p class="empty">All orders sent to kitchen.</p>
+      }
+      @for (order of ds.openOrders(); track order.id) {
+        @if (!order.kotSent) {
+          <div class="kot-card">
+            <div class="kot-header">
+              <strong>KOT — Order #{{ order.id }}</strong>
+              <span>Table {{ order.tableNumber }} · {{ order.time | date:'shortTime' }}</span>
+            </div>
+            <ul>
+              @for (i of order.items; track i.menuItem.id) {
+                <li><strong>{{ i.qty }}×</strong> {{ i.menuItem.name }} @if (i.note) { <em>— {{ i.note }}</em> }</li>
+              }
+            </ul>
+            <button class="btn-orange" (click)="ds.sendKOT(order.id)">✅ Mark Sent to Kitchen</button>
+          </div>
+        }
+      }
+    </section>
+  }
 </div>
+
+<!-- BILL MODAL -->
+@if (selectedOrder) {
+  <div class="bill-overlay" (click)="closeBill()">
+    <div class="bill-modal" (click)="$event.stopPropagation()">
+      <div class="bill-print-area">
+        <div class="bill-header">
+          <h2>{{ ds.settings().name }}</h2>
+          <p>{{ ds.settings().address }}</p>
+          <p>📞 {{ ds.settings().phone }}</p>
+          <p>GST: {{ ds.settings().gstNumber }}</p>
+          <hr>
+        </div>
+        <div class="bill-meta">
+          <span>Bill #{{ selectedOrder.id }}</span>
+          <span>Table {{ selectedOrder.tableNumber }}</span>
+          <span>{{ selectedOrder.time | date:'medium' }}</span>
+          <span>Waiter: {{ selectedOrder.waiter }}</span>
+        </div>
+        <hr>
+        <table class="bill-table">
+          <thead><tr><th>Item</th><th>Qty</th><th>Rate</th><th>Amt</th></tr></thead>
+          <tbody>
+            @for (i of selectedOrder.items; track i.menuItem.id) {
+              <tr>
+                <td>{{ i.menuItem.name }}@if (i.note){<br><small>📝 {{ i.note }}</small>}</td>
+                <td>{{ i.qty }}</td>
+                <td>₹{{ i.menuItem.price }}</td>
+                <td>₹{{ i.menuItem.price * i.qty }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+        <hr>
+        <div class="bill-totals">
+          <div><span>Subtotal</span><span>₹{{ ds.orderSubtotal(selectedOrder) }}</span></div>
+          @if (selectedOrder.discount > 0) {
+            <div class="discount"><span>Discount</span><span>−₹{{ selectedOrder.discount }}</span></div>
+          }
+          <div><span>GST ({{ ds.settings().gstPercent }}%)</span><span>₹{{ ds.orderTax(selectedOrder) }}</span></div>
+          <div class="total-row"><span>TOTAL</span><span>₹{{ ds.orderTotal(selectedOrder) }}</span></div>
+        </div>
+        <hr>
+        <p class="bill-footer">Thank you for dining with us!<br>{{ ds.settings().tagline }}</p>
+      </div>
+      <div class="bill-actions no-print">
+        <button class="btn-green" (click)="printBill()">🖨️ Print Bill</button>
+        <button class="btn-red" (click)="closeBill()">Close</button>
+      </div>
+    </div>
+  </div>
+}

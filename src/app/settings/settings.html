@@ -1,0 +1,75 @@
+<div class="app">
+  <header>
+    <h1>🔧 Restaurant Settings</h1>
+    <div class="header-right">
+      <a routerLink="/dashboard" class="nav-pill">← Dashboard</a>
+      <button class="logout-btn" (click)="logout()">Logout</button>
+    </div>
+  </header>
+
+  @if (saved) {
+    <div class="success-bar">✅ Settings saved successfully!</div>
+  }
+
+  <div class="settings-grid">
+    <section>
+      <h2>🏠 Restaurant Info</h2>
+      <div class="form-group">
+        <label>Restaurant Name</label>
+        <input [(ngModel)]="form.name" type="text" placeholder="e.g. Himalayan Bites" />
+      </div>
+      <div class="form-group">
+        <label>Tagline</label>
+        <input [(ngModel)]="form.tagline" type="text" placeholder="Short description" />
+      </div>
+      <div class="form-group">
+        <label>Address</label>
+        <input [(ngModel)]="form.address" type="text" placeholder="Full address" />
+      </div>
+      <div class="form-group">
+        <label>Phone</label>
+        <input [(ngModel)]="form.phone" type="text" placeholder="+91 XXXXX XXXXX" />
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input [(ngModel)]="form.email" type="email" placeholder="restaurant@email.com" />
+      </div>
+    </section>
+
+    <section>
+      <h2>💰 Tax & Billing</h2>
+      <div class="form-group">
+        <label>GST Number</label>
+        <input [(ngModel)]="form.gstNumber" type="text" placeholder="15-digit GST number" />
+      </div>
+      <div class="form-group">
+        <label>GST Percentage (%)</label>
+        <input [(ngModel)]="form.gstPercent" type="number" min="0" max="28" />
+      </div>
+      <div class="form-group">
+        <label>Currency Symbol</label>
+        <input [(ngModel)]="form.currency" type="text" style="width:80px" placeholder="₹" />
+      </div>
+
+      <h2 style="margin-top:24px">🕐 Operating Hours</h2>
+      <div class="form-group">
+        <label>Opening Time</label>
+        <input [(ngModel)]="form.openTime" type="time" />
+      </div>
+      <div class="form-group">
+        <label>Closing Time</label>
+        <input [(ngModel)]="form.closeTime" type="time" />
+      </div>
+
+      <h2 style="margin-top:24px">🪑 Tables</h2>
+      <div class="form-group">
+        <label>Number of Tables</label>
+        <input [(ngModel)]="form.tableCount" type="number" min="1" max="100" style="width:100px" />
+      </div>
+    </section>
+  </div>
+
+  <div class="save-bar">
+    <button class="btn-save" (click)="save()">💾 Save All Settings</button>
+  </div>
+</div>

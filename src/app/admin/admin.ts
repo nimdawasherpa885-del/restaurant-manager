@@ -1,29 +1,21 @@
 import { Component, signal, inject, PLATFORM_ID, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { DataService, MenuItem } from '../data/data';
 
-interface User {
-  username: string;
-  role: string;
-}
-
-interface MenuItem {
-  id: number;
-  name: string;
-  price: number;
-  category: string;
-}
+interface User { username: string; role: string; }
 
 @Component({
   selector: 'app-admin',
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule, RouterLink],
   templateUrl: './admin.html',
   styleUrl: './admin.css',
 })
 export class Admin implements OnInit {
   private router = inject(Router);
   private platformId = inject(PLATFORM_ID);
+  ds = inject(DataService);
 
   activeTab = signal<'users' | 'menu' | 'tables'>('users');
 
@@ -35,9 +27,7 @@ export class Admin implements OnInit {
     const list: User[] = [{ username: 'admin', role: 'Admin' }];
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i)!;
-      if (key.startsWith('user_')) {
-        list.push({ username: key.replace('user_', ''), role: 'Staff' });
-      }
+      if (key.startsWith('user_')) list.push({ username: key.replace('user_', ''), role: 'Staff' });
     }
     this.users.set(list);
   }
@@ -49,90 +39,39 @@ export class Admin implements OnInit {
   }
 
   // --- Menu ---
-  menuItems = signal<MenuItem[]>([]);
-  newItem = { name: '', price: 0, category: '' };
+  newItem = { name: '', price: 0, category: '', description: '', available: true };
+  editingId: number | null = null;
 
-  loadMenu() {
-    if (!isPlatformBrowser(this.platformId)) return;
-    const saved = localStorage.getItem('menuItems');
-    if (saved) {
-      this.menuItems.set(JSON.parse(saved));
-    } else {
-      const defaults: MenuItem[] = [
-        { id: 1, name: 'Burger', price: 8.99, category: 'Main' },
-        { id: 2, name: 'Pizza', price: 12.99, category: 'Main' },
-        { id: 3, name: 'Salad', price: 6.5, category: 'Starter' },
-        { id: 4, name: 'Fries', price: 3.5, category: 'Side' },
-        { id: 5, name: 'Coke', price: 2.0, category: 'Drink' },
-      ];
-      this.menuItems.set(defaults);
-      this.saveMenu(defaults);
-    }
+  startEdit(item: MenuItem) {
+    this.editingId = item.id;
+    this.newItem = { name: item.name, price: item.price, category: item.category, description: item.description, available: item.available };
   }
 
-  saveMenu(items: MenuItem[]) {
-    if (isPlatformBrowser(this.platformId)) {
-      localStorage.setItem('menuItems', JSON.stringify(items));
+  saveEdit() {
+    if (this.editingId) {
+      this.ds.updateMenuItem(this.editingId, { ...this.newItem });
+      this.editingId = null;
+      this.newItem = { name: '', price: 0, category: '', description: '', available: true };
     }
   }
 
   addMenuItem() {
     if (!this.newItem.name || !this.newItem.price || !this.newItem.category) return;
-    const updated = [...this.menuItems(), { id: Date.now(), ...this.newItem }];
-    this.menuItems.set(updated);
-    this.saveMenu(updated);
-    this.newItem = { name: '', price: 0, category: '' };
-  }
-
-  removeMenuItem(id: number) {
-    const updated = this.menuItems().filter(i => i.id !== id);
-    this.menuItems.set(updated);
-    this.saveMenu(updated);
-  }
-
-  // --- Tables ---
-  tableCount = signal(10);
-  newTableCount = 10;
-
-  loadTables() {
-    if (!isPlatformBrowser(this.platformId)) return;
-    const saved = localStorage.getItem('tableCount');
-    if (saved) {
-      this.tableCount.set(+saved);
-      this.newTableCount = +saved;
-    }
-  }
-
-  saveTables() {
-    if (isPlatformBrowser(this.platformId)) {
-      localStorage.setItem('tableCount', String(this.newTableCount));
-      this.tableCount.set(this.newTableCount);
-    }
-  }
-
-  tables() {
-    return Array.from({ length: this.tableCount() }, (_, i) => i + 1);
+    this.ds.addMenuItem({ ...this.newItem });
+    this.newItem = { name: '', price: 0, category: '', description: '', available: true };
   }
 
   logout() {
-    if (isPlatformBrowser(this.platformId)) {
-      localStorage.removeItem('loggedIn');
-    }
+    if (isPlatformBrowser(this.platformId)) { localStorage.removeItem('loggedIn'); localStorage.removeItem('currentUser'); }
     this.router.navigate(['/login']);
   }
 
   ngOnInit() {
-    // only admin can access this page
     if (isPlatformBrowser(this.platformId)) {
-      const loggedIn = localStorage.getItem('loggedIn');
-      const currentUser = localStorage.getItem('currentUser');
-      if (!loggedIn || currentUser !== 'admin') {
-        this.router.navigate(['/login']);
-        return;
+      if (!localStorage.getItem('loggedIn') || localStorage.getItem('currentUser') !== 'admin') {
+        this.router.navigate(['/login']); return;
       }
     }
     this.loadUsers();
-    this.loadMenu();
-    this.loadTables();
   }
 }

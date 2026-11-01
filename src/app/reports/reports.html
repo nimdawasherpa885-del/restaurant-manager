@@ -2,40 +2,54 @@
   <header>
     <h1>📊 Daily Reports</h1>
     <div class="header-right">
-      <a href="/admin" class="nav-link">← Admin</a>
+      <a routerLink="/dashboard" class="nav-pill">← Dashboard</a>
       <button class="logout-btn" (click)="logout()">Logout</button>
     </div>
   </header>
 
-  <div class="date-bar">📅 {{ today }} · Himalayan Bites, Lava, Kalimpong</div>
+  <div class="date-bar">📅 {{ today }} · {{ ds.settings().name }}</div>
 
   <!-- SUMMARY CARDS -->
   <div class="summary-grid">
     <div class="summary-card green">
       <div class="s-icon">💰</div>
       <div class="s-info">
-        <div class="s-num">₹{{ totalRevenue() }}</div>
+        <div class="s-num">₹{{ ds.todayRevenue() }}</div>
         <div class="s-label">Total Revenue</div>
       </div>
     </div>
     <div class="summary-card blue">
-      <div class="s-icon">🧾</div>
+      <div class="s-icon">✅</div>
       <div class="s-info">
-        <div class="s-num">{{ paidCount() }}</div>
-        <div class="s-label">Orders Completed</div>
+        <div class="s-num">{{ ds.paidOrders().length }}</div>
+        <div class="s-label">Paid Orders</div>
       </div>
     </div>
     <div class="summary-card orange">
       <div class="s-icon">🍽️</div>
       <div class="s-info">
-        <div class="s-num">{{ openCount() }}</div>
-        <div class="s-label">Orders Open</div>
+        <div class="s-num">{{ ds.openOrders().length }}</div>
+        <div class="s-label">Open Orders</div>
+      </div>
+    </div>
+    <div class="summary-card red">
+      <div class="s-icon">✖</div>
+      <div class="s-info">
+        <div class="s-num">{{ cancelledOrders() }}</div>
+        <div class="s-label">Cancelled</div>
       </div>
     </div>
     <div class="summary-card purple">
+      <div class="s-icon">📈</div>
+      <div class="s-info">
+        <div class="s-num">₹{{ avgOrderValue() }}</div>
+        <div class="s-label">Avg Order Value</div>
+      </div>
+    </div>
+    <div class="summary-card teal">
       <div class="s-icon">📋</div>
       <div class="s-info">
-        <div class="s-num">{{ orders().length }}</div>
+        <div class="s-num">{{ ds.orders().length }}</div>
         <div class="s-label">Total Orders</div>
       </div>
     </div>
@@ -43,11 +57,10 @@
 
   <!-- TOP ITEMS -->
   <section>
-    <h2>🏆 Top Selling Items Today</h2>
+    <h2>🏆 Top Selling Items</h2>
+    @if (topItems().length === 0) { <p class="empty">No sales data yet. Mark some orders as paid.</p> }
     <table>
-      <thead>
-        <tr><th>#</th><th>Item</th><th>Qty Sold</th><th>Revenue</th></tr>
-      </thead>
+      <thead><tr><th>#</th><th>Item</th><th>Qty Sold</th><th>Revenue</th></tr></thead>
       <tbody>
         @for (item of topItems(); track item.name; let i = $index) {
           <tr>
@@ -63,21 +76,24 @@
 
   <!-- ORDER LOG -->
   <section>
-    <h2>📋 Order Log</h2>
+    <h2>📋 All Orders</h2>
+    @if (ds.orders().length === 0) { <p class="empty">No orders yet.</p> }
     <table>
-      <thead>
-        <tr><th>Order #</th><th>Table</th><th>Time</th><th>Items</th><th>Total</th><th>Status</th></tr>
-      </thead>
+      <thead><tr><th>Order #</th><th>Table</th><th>Waiter</th><th>Time</th><th>Items</th><th>Subtotal</th><th>Discount</th><th>GST</th><th>Total</th><th>Status</th></tr></thead>
       <tbody>
-        @for (order of orders(); track order.id) {
+        @for (order of ds.orders(); track order.id) {
           <tr>
             <td>#{{ order.id }}</td>
             <td>Table {{ order.tableNumber }}</td>
-            <td>{{ order.time }}</td>
-            <td>{{ order.items.map(i => i.menuItem.name).join(', ') }}</td>
-            <td>₹{{ orderTotal(order) }}</td>
+            <td>{{ order.waiter }}</td>
+            <td>{{ order.time | date:'shortTime' }}</td>
+            <td class="items-col">{{ order.items.map(i => i.menuItem.name + ' x' + i.qty).join(', ') }}</td>
+            <td>₹{{ ds.orderSubtotal(order) }}</td>
+            <td>{{ order.discount > 0 ? '−₹' + order.discount : '—' }}</td>
+            <td>₹{{ ds.orderTax(order) }}</td>
+            <td><strong>₹{{ ds.orderTotal(order) }}</strong></td>
             <td>
-              <span class="badge" [class.paid]="order.status === 'paid'" [class.open]="order.status === 'open'">
+              <span class="badge" [class.paid]="order.status === 'paid'" [class.open]="order.status === 'open'" [class.cancelled]="order.status === 'cancelled'">
                 {{ order.status }}
               </span>
             </td>

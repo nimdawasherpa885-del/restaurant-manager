@@ -1,0 +1,125 @@
+<div class="app">
+  <header>
+    <h1>📊 Admin Dashboard</h1>
+    <div class="header-right">
+      <a routerLink="/admin" class="nav-pill">⚙️ Manage</a>
+      <a routerLink="/staff" class="nav-pill">👨‍🍳 Staff</a>
+      <a routerLink="/reports" class="nav-pill">📋 Reports</a>
+      <a routerLink="/settings" class="nav-pill">🔧 Settings</a>
+      <button class="logout-btn" (click)="logout()">Logout</button>
+    </div>
+  </header>
+
+  <div class="restaurant-name">
+    {{ ds.settings().name }} · {{ ds.settings().address }}
+  </div>
+
+  <!-- SUMMARY CARDS -->
+  <div class="cards-grid">
+    <div class="card green">
+      <div class="card-icon">💰</div>
+      <div class="card-info">
+        <div class="card-num">₹{{ ds.todayRevenue() }}</div>
+        <div class="card-label">Today's Revenue</div>
+      </div>
+    </div>
+    <div class="card orange">
+      <div class="card-icon">🍽️</div>
+      <div class="card-info">
+        <div class="card-num">{{ ds.openOrders().length }}</div>
+        <div class="card-label">Open Orders</div>
+      </div>
+    </div>
+    <div class="card blue">
+      <div class="card-icon">✅</div>
+      <div class="card-info">
+        <div class="card-num">{{ ds.paidOrders().length }}</div>
+        <div class="card-label">Paid Orders</div>
+      </div>
+    </div>
+    <div class="card purple">
+      <div class="card-icon">📅</div>
+      <div class="card-info">
+        <div class="card-num">{{ pendingReservations() }}</div>
+        <div class="card-label">Pending Reservations</div>
+      </div>
+    </div>
+    <div class="card teal">
+      <div class="card-icon">🪑</div>
+      <div class="card-info">
+        <div class="card-num">{{ ds.settings().tableCount }}</div>
+        <div class="card-label">Total Tables</div>
+      </div>
+    </div>
+    <div class="card red">
+      <div class="card-icon">🍴</div>
+      <div class="card-info">
+        <div class="card-num">{{ availableMenuItems() }}/{{ totalMenuItems() }}</div>
+        <div class="card-label">Menu Available</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <!-- TOP ITEMS -->
+    <section>
+      <h2>🏆 Top Selling Items</h2>
+      @if (topItems().length === 0) { <p class="empty">No sales data yet.</p> }
+      @for (item of topItems(); track item.name; let i = $index) {
+        <div class="top-item">
+          <span class="rank">{{ i + 1 }}</span>
+          <span class="item-name">{{ item.name }}</span>
+          <span class="item-qty">{{ item.qty }} sold</span>
+          <span class="item-rev">₹{{ item.revenue }}</span>
+        </div>
+      }
+    </section>
+
+    <!-- RECENT ORDERS -->
+    <section>
+      <h2>🕐 Recent Orders</h2>
+      @if (recentOrders().length === 0) { <p class="empty">No orders yet.</p> }
+      @for (order of recentOrders(); track order.id) {
+        <div class="recent-order">
+          <div class="ro-left">
+            <strong>#{{ order.id }}</strong> · Table {{ order.tableNumber }}
+            <span class="ro-waiter">{{ order.waiter }}</span>
+          </div>
+          <div class="ro-right">
+            <span class="badge" [class.open]="order.status === 'open'" [class.paid]="order.status === 'paid'" [class.cancelled]="order.status === 'cancelled'">
+              {{ order.status }}
+            </span>
+            <span class="ro-total">₹{{ ds.orderTotal(order) }}</span>
+          </div>
+        </div>
+      }
+    </section>
+  </div>
+
+  <!-- RESERVATIONS -->
+  <section>
+    <h2>📅 Pending Reservations</h2>
+    @if (ds.reservations().filter(r => r.status === 'pending').length === 0) {
+      <p class="empty">No pending reservations.</p>
+    }
+    <div class="res-grid">
+      @for (r of ds.reservations(); track r.id) {
+        @if (r.status === 'pending') {
+          <div class="res-card">
+            <div class="res-top">
+              <strong>{{ r.name }}</strong>
+              <span>{{ r.guests }} guests</span>
+            </div>
+            <div class="res-info">📅 {{ r.date }} at {{ r.time }}</div>
+            <div class="res-info">📞 {{ r.phone }}</div>
+            @if (r.note) { <div class="res-note">📝 {{ r.note }}</div> }
+            <div class="res-actions">
+              <button class="btn-green" (click)="ds.updateReservationStatus(r.id, 'confirmed')">✅ Confirm</button>
+              <button class="btn-red" (click)="ds.updateReservationStatus(r.id, 'cancelled')">✖ Cancel</button>
+            </div>
+          </div>
+        }
+      }
+    </div>
+  </section>
+</div>

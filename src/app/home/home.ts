@@ -1,27 +1,8 @@
-import { Component, signal, computed, inject, PLATFORM_ID } from '@angular/core';
+import { Component, signal, inject, PLATFORM_ID } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Router } from '@angular/router';
-
-interface MenuItem {
-  id: number;
-  name: string;
-  price: number;
-  category: string;
-}
-
-interface OrderItem {
-  menuItem: MenuItem;
-  qty: number;
-}
-
-interface Order {
-  id: number;
-  tableNumber: number;
-  items: OrderItem[];
-  status: 'open' | 'paid';
-  time: Date;
-}
+import { DataService, Order, OrderItem } from '../data/data';
 
 @Component({
   selector: 'app-home',
@@ -32,77 +13,70 @@ interface Order {
 export class Home {
   private router = inject(Router);
   private platformId = inject(PLATFORM_ID);
+  ds = inject(DataService);
 
-  activeTab = signal<'menu' | 'orders' | 'tables'>('menu');
+  activeTab = signal<'orders' | 'menu' | 'tables' | 'kot'>('orders');
+
+  // current logged in user as waiter name
+  waiterName = isPlatformBrowser(this.platformId) ? (localStorage.getItem('currentUser') || 'Staff') : 'Staff';
+
+  // --- New Order Form ---
+  newOrderTable = 1;
+  newOrderDiscount = 0;
+  selectedItems: { [menuId: number]: { qty: number; note: string } } = {};
+
+  getQty(id: number) { return this.selectedItems[id]?.qty || 0; }
+  getNote(id: number) { return this.selectedItems[id]?.note || ''; }
+
+  setQty(id: number, qty: number) {
+    if (!this.selectedItems[id]) this.selectedItems[id] = { qty: 0, note: '' };
+    this.selectedItems[id].qty = qty < 0 ? 0 : qty;
+  }
+
+  setNote(id: number, note: string) {
+    if (!this.selectedItems[id]) this.selectedItems[id] = { qty: 0, note: '' };
+    this.selectedItems[id].note = note;
+  }
+
+  orderItemCount() {
+    return Object.values(this.selectedItems).filter(v => v.qty > 0).length;
+  }
+
+  createOrder() {
+    const items: OrderItem[] = this.ds.menuItems()
+      .filter(m => this.selectedItems[m.id]?.qty > 0)
+      .map(m => ({ menuItem: m, qty: this.selectedItems[m.id].qty, note: this.selectedItems[m.id].note || '' }));
+    if (items.length === 0) return;
+    this.ds.createOrder(this.newOrderTable, this.waiterName, items, this.newOrderDiscount);
+    this.selectedItems = {};
+    this.newOrderDiscount = 0;
+    this.activeTab.set('orders');
+  }
+
+  // --- Bill view ---
+  selectedOrder: Order | null = null;
+
+  viewBill(order: Order) {
+    this.selectedOrder = order;
+  }
+
+  closeBill() { this.selectedOrder = null; }
+
+  printBill() { window.print(); }
+
+  categories() {
+    return [...new Set(this.ds.menuItems().filter(m => m.available).map(m => m.category))];
+  }
+
+  menuByCategory(cat: string) {
+    return this.ds.menuItems().filter(m => m.category === cat && m.available);
+  }
 
   logout() {
     if (isPlatformBrowser(this.platformId)) {
       localStorage.removeItem('loggedIn');
+      localStorage.removeItem('currentUser');
     }
     this.router.navigate(['/login']);
-  }
-
-  // --- Menu ---
-  menuItems = signal<MenuItem[]>([
-    { id: 1, name: 'Burger', price: 8.99, category: 'Main' },
-    { id: 2, name: 'Pizza', price: 12.99, category: 'Main' },
-    { id: 3, name: 'Salad', price: 6.5, category: 'Starter' },
-    { id: 4, name: 'Fries', price: 3.5, category: 'Side' },
-    { id: 5, name: 'Coke', price: 2.0, category: 'Drink' },
-  ]);
-
-  newItem = { name: '', price: 0, category: '' };
-
-  addMenuItem() {
-    if (!this.newItem.name || !this.newItem.price || !this.newItem.category) return;
-    this.menuItems.set([...this.menuItems(), { id: Date.now(), ...this.newItem }]);
-    this.newItem = { name: '', price: 0, category: '' };
-  }
-
-  removeMenuItem(id: number) {
-    this.menuItems.set(this.menuItems().filter(i => i.id !== id));
-  }
-
-  // --- Orders ---
-  orders = signal<Order[]>([]);
-  nextOrderId = 1;
-  newOrderTable = 1;
-  selectedItems: { [menuId: number]: number } = {};
-
-  createOrder() {
-    const items: OrderItem[] = this.menuItems()
-      .filter(m => this.selectedItems[m.id] > 0)
-      .map(m => ({ menuItem: m, qty: this.selectedItems[m.id] }));
-    if (items.length === 0) return;
-    this.orders.set([...this.orders(), {
-      id: this.nextOrderId++,
-      tableNumber: this.newOrderTable,
-      items,
-      status: 'open',
-      time: new Date(),
-    }]);
-    this.selectedItems = {};
-  }
-
-  orderTotal(order: Order): number {
-    return order.items.reduce((sum, i) => sum + i.menuItem.price * i.qty, 0);
-  }
-
-  markPaid(orderId: number) {
-    this.orders.set(this.orders().map(o => o.id === orderId ? { ...o, status: 'paid' } : o));
-  }
-
-  deleteOrder(orderId: number) {
-    this.orders.set(this.orders().filter(o => o.id !== orderId));
-  }
-
-  openOrders = computed(() => this.orders().filter(o => o.status === 'open'));
-  paidOrders = computed(() => this.orders().filter(o => o.status === 'paid'));
-
-  // --- Tables ---
-  tables = signal(Array.from({ length: 10 }, (_, i) => ({ number: i + 1 })));
-
-  tableStatus(tableNum: number): 'free' | 'occupied' {
-    return this.openOrders().some(o => o.tableNumber === tableNum) ? 'occupied' : 'free';
   }
 }

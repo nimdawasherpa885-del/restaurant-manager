@@ -2,11 +2,13 @@
   <header>
     <h1>⚙️ Admin Panel</h1>
     <nav>
-      <button [class.active]="activeTab() === 'users'" (click)="activeTab.set('users')">Users</button>
-      <button [class.active]="activeTab() === 'menu'" (click)="activeTab.set('menu')">Menu</button>
-      <button [class.active]="activeTab() === 'tables'" (click)="activeTab.set('tables')">Tables</button>
-      <a href="/staff" class="nav-pill">👨‍🍳 Staff</a>
-      <a href="/reports" class="nav-pill">📊 Reports</a>
+      <button [class.active]="activeTab() === 'users'" (click)="activeTab.set('users')">👥 Users</button>
+      <button [class.active]="activeTab() === 'menu'" (click)="activeTab.set('menu')">🍴 Menu</button>
+      <button [class.active]="activeTab() === 'tables'" (click)="activeTab.set('tables')">🪑 Tables</button>
+      <a routerLink="/dashboard" class="nav-pill">📊 Dashboard</a>
+      <a routerLink="/staff" class="nav-pill">👨🍳 Staff</a>
+      <a routerLink="/reports" class="nav-pill">📋 Reports</a>
+      <a routerLink="/settings" class="nav-pill">🔧 Settings</a>
     </nav>
     <button class="logout-btn" (click)="logout()">Logout</button>
   </header>
@@ -16,9 +18,7 @@
     <section>
       <h2>Manage Users</h2>
       <table>
-        <thead>
-          <tr><th>Username</th><th>Role</th><th></th></tr>
-        </thead>
+        <thead><tr><th>Username</th><th>Role</th><th></th></tr></thead>
         <tbody>
           @for (user of users(); track user.username) {
             <tr>
@@ -42,23 +42,51 @@
   @if (activeTab() === 'menu') {
     <section>
       <h2>Manage Menu</h2>
+
+      @if (editingId) {
+        <div class="edit-form">
+          <h3>✏️ Edit Item</h3>
+          <div class="form-row">
+            <input [(ngModel)]="newItem.name" placeholder="Name" />
+            <input [(ngModel)]="newItem.price" type="number" placeholder="Price (₹)" />
+            <input [(ngModel)]="newItem.category" placeholder="Category" />
+            <input [(ngModel)]="newItem.description" placeholder="Description" />
+            <label class="avail-toggle"><input type="checkbox" [(ngModel)]="newItem.available" /> Available</label>
+            <button class="btn-green" (click)="saveEdit()">💾 Save</button>
+            <button class="btn-gray" (click)="editingId = null">Cancel</button>
+          </div>
+        </div>
+      }
+
       <div class="add-form">
         <input [(ngModel)]="newItem.name" placeholder="Item name" />
-        <input [(ngModel)]="newItem.price" type="number" placeholder="Price" />
+        <input [(ngModel)]="newItem.price" type="number" placeholder="Price (₹)" />
         <input [(ngModel)]="newItem.category" placeholder="Category" />
-        <button class="btn-green" (click)="addMenuItem()">+ Add</button>
+        <input [(ngModel)]="newItem.description" placeholder="Description (optional)" />
+        <button class="btn-green" (click)="addMenuItem()">+ Add Item</button>
       </div>
+
       <table>
-        <thead>
-          <tr><th>Name</th><th>Category</th><th>Price</th><th></th></tr>
-        </thead>
+        <thead><tr><th>Name</th><th>Category</th><th>Description</th><th>Price</th><th>Status</th><th></th></tr></thead>
         <tbody>
-          @for (item of menuItems(); track item.id) {
-            <tr>
-              <td>{{ item.name }}</td>
+          @for (item of ds.menuItems(); track item.id) {
+            <tr [class.unavailable]="!item.available">
+              <td><strong>{{ item.name }}</strong></td>
               <td><span class="badge">{{ item.category }}</span></td>
-              <td>${{ item.price.toFixed(2) }}</td>
-              <td><button class="btn-red" (click)="removeMenuItem(item.id)">Remove</button></td>
+              <td class="desc-col">{{ item.description }}</td>
+              <td>₹{{ item.price }}</td>
+              <td>
+                <span class="badge" [class.avail]="item.available" [class.unavail]="!item.available">
+                  {{ item.available ? '✅ Available' : '❌ Off' }}
+                </span>
+              </td>
+              <td class="actions">
+                <button class="btn-blue" (click)="startEdit(item)">Edit</button>
+                <button class="btn-orange" (click)="ds.updateMenuItem(item.id, {available: !item.available})">
+                  {{ item.available ? 'Disable' : 'Enable' }}
+                </button>
+                <button class="btn-red" (click)="ds.removeMenuItem(item.id)">Remove</button>
+              </td>
             </tr>
           }
         </tbody>
@@ -70,17 +98,11 @@
   @if (activeTab() === 'tables') {
     <section>
       <h2>Manage Tables</h2>
-      <div class="table-setting">
-        <label>Number of Tables</label>
-        <div class="table-setting-row">
-          <input [(ngModel)]="newTableCount" type="number" min="1" max="50" style="width: 80px" />
-          <button class="btn-green" (click)="saveTables()">Save</button>
-        </div>
-      </div>
+      <p class="hint-text">Change table count in <a routerLink="/settings">⚙️ Settings</a>.</p>
       <div class="tables-grid">
-        @for (t of tables(); track t) {
+        @for (n of [].constructor(ds.settings().tableCount); track $index) {
           <div class="table-card">
-            <div class="table-num">Table {{ t }}</div>
+            <div class="table-num">Table {{ $index + 1 }}</div>
           </div>
         }
       </div>
